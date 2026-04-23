@@ -2,22 +2,6 @@
 
 Minimal number memorization game.
 
-```bash
-npm install
-npm run dev
-```
-
-## Deploy to GitHub Pages (free)
-
-1. Push this repo to GitHub
-2. Go to **Settings → Pages → Source** → set to **GitHub Actions**
-3. Push to `main` — the workflow auto-builds and deploys
-
-> **Note**: If your repo name is not the root (`username.github.io`), set `base` in `vite.config.ts`:
-> ```ts
-> base: '/your-repo-name/'
-> ```
-
 ## Project structure
 
 ```
