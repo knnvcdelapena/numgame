@@ -1,0 +1,328 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #ffffff;
+  --fg: #000000;
+  --fg-muted: #888888;
+  --fg-faint: #cccccc;
+  --border: #e0e0e0;
+  --font: "Roboto Mono", monospace;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.screen {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  animation: fadein 0.2s ease;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.label {
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.digit-options {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.digit-btn {
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 500;
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--fg);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.digit-btn:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.progress {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  letter-spacing: 0.1em;
+}
+
+.digit-display {
+  font-size: clamp(6rem, 20vw, 10rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+
+.next-btn {
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--fg);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.next-btn:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.hint {
+  font-size: 0.7rem;
+  color: var(--fg-faint);
+  letter-spacing: 0.08em;
+}
+
+.recall-input-wrap {
+  width: 100%;
+}
+
+.recall-input {
+  font-family: var(--font);
+  font-size: 1.5rem;
+  font-weight: 400;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--fg);
+  padding: 0.5rem 0;
+  background: transparent;
+  color: var(--fg);
+  letter-spacing: 0.1em;
+  outline: none;
+  caret-color: var(--fg);
+  text-align: center;
+}
+
+.recall-input::placeholder {
+  color: var(--fg-faint);
+}
+
+.recall-count {
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+  margin-top: 0.5rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.submit-btn {
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--fg);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.submit-btn:hover,
+.submit-btn:not(:disabled):active {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.submit-btn:disabled {
+  border-color: var(--fg-faint);
+  color: var(--fg-faint);
+  cursor: default;
+}
+
+.result-verdict {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.result-verdict.correct {
+  color: var(--fg);
+}
+.result-verdict.wrong {
+  color: var(--fg);
+}
+
+.comparison {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.comparison-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.comparison-col .label {
+  margin-bottom: 0.25rem;
+}
+
+.sequence-display {
+  font-size: 1.4rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.sequence-display .char-correct {
+  color: var(--fg);
+}
+.sequence-display .char-wrong {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+.sequence-display .char-missing {
+  color: var(--fg-faint);
+}
+
+.divider {
+  width: 1px;
+  background: var(--border);
+  align-self: stretch;
+}
+
+.streak-row {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-end;
+}
+
+.streak-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.streak-num {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.action-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.play-again-btn {
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--fg);
+  background: var(--fg);
+  color: var(--bg);
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.play-again-btn:hover {
+  background: transparent;
+  color: var(--fg);
+}
+
+.change-digits-btn {
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition:
+    border-color 0.12s,
+    color 0.12s;
+}
+
+.change-digits-btn:hover {
+  border-color: var(--fg);
+  color: var(--fg);
+}
+
+.wordmark {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
