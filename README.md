@@ -1,6 +1,6 @@
 # numgame
 
-Minimal number memorization game. ## Dev
+Minimal number memorization game.
 
 ```bash
 npm install
