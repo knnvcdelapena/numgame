@@ -1,8 +1,6 @@
 # numgame
 
-Minimal number memorization game. Roboto Mono, monochrome, no dependencies beyond Vite.
-
-## Dev
+Minimal number memorization game. ## Dev
 
 ```bash
 npm install
