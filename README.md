@@ -1,9 +1,10 @@
-# numgame
+# NumGame
 
 Number Memorization Game
 
-## Project structure
+## Project Structure
 
+```
 numgame/
 ├── .github/
 │   └── workflows/
@@ -18,35 +19,72 @@ numgame/
 ├── package-lock.json
 ├── tsconfig.json
 └── vite.config.ts
+```
 
-## Game flow
+## Game Flow
 
-### 1. Settings screen
-- Pick digit count: **4 / 6 / 8 / 10 / 15** or type any custom number
-- Pick display style: **one at a time** or **all at once**
-- Pick mode: **free-time** or **timed**
-- Timed mode shows the science-backed duration before you start
+### 1. Settings Screen
 
-### 2. Memorize — one at a time
-- Each digit shown individually, large and centered
-- **Free-time**: press `→`, `Space`, or click Next to advance
-- **Timed**: auto-advances every 1.5s per digit (Baddeley phonological loop)
+* Select digit count: **4 / 6 / 8 / 10 / 15** or custom input
+* Choose display style:
 
-### 3. Memorize — all at once
-- All digits shown simultaneously, grouped in rows of 5
-- **Free-time**: press "I'm ready" when done
-- **Timed**: a progress bar counts down (3s base + 0.5s per digit), then auto-proceeds
+  * **One at a time**
+  * **All at once**
+* Choose mode:
 
-### 4. Recall screen
-- Type the full sequence from memory
-- Keyboard auto-focused, digits only
-- Counter shows progress (e.g. 4 / 10)
-- Press Enter or click Submit when done
+  * **Free-time**
+  * **Timed**
+* Timed mode shows a pre-calculated duration before starting
 
-### 5. Result screen
-- **Correct or wrong** verdict
-- Side-by-side comparison: correct sequence vs your answer
-- Wrong digits are underlined
-- Streak and best streak shown
-- **Play again** restarts with same settings
-- **Settings** goes back to the settings screen
+### 2. Memorize — One at a Time
+
+* Digits appear individually, large and centered
+
+**Free-time mode**
+
+* Press `→`, `Space`, or click **Next**
+
+**Timed mode**
+
+* Auto-advances every **1.5s per digit**
+
+### 3. Memorize — All at Once
+
+* All digits displayed simultaneously
+* Grouped in rows of 5
+
+**Free-time mode**
+
+* Click **"I'm ready"** when done
+
+**Timed mode**
+
+* Progress bar countdown:
+
+  * **3s base + 0.5s per digit**
+* Automatically proceeds after timer
+
+### 4. Recall Screen
+
+* Enter the full sequence from memory
+* Input is auto-focused (digits only)
+* Progress indicator (e.g. `4 / 10`)
+* Submit using **Enter** or button
+
+### 5. Result Screen
+
+* Shows **correct or incorrect** result
+* Side-by-side comparison:
+
+  * Correct sequence
+  * Your input
+* Incorrect digits are underlined
+* Displays:
+
+  * Current streak
+  * Best streak
+
+**Actions**
+
+* **Play Again** — restart with same settings
+* **Settings** — return to configuration
