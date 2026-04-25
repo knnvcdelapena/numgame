@@ -1,14 +1,12 @@
 import { supabase } from './supabase'
 
 export async function submitScore({
-  userId,
   sequence,
   answer,
   digitCount,
   displayStyle,
   gameMode,
 }: {
-  userId: string
   sequence: number[]
   answer: string
   digitCount: number

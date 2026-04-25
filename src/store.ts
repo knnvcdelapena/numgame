@@ -197,13 +197,12 @@ export async function submitRecall() {
 
   if (state.user) {
     eloChange = await submitScore({
-      userId: state.user.id,
-      sequence: state.sequence,
-      answer: state.input,
-      digitCount: state.digitCount,
-      displayStyle: state.displayStyle,
-      gameMode: state.gameMode,
-    })
+  sequence: state.sequence,
+  answer: state.input,
+  digitCount: state.digitCount,
+  displayStyle: state.displayStyle,
+  gameMode: state.gameMode,
+})
 
     // Refresh elo
     const { data } = await import('./supabase').then(m =>
