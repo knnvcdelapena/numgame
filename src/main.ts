@@ -1,44 +1,131 @@
 import {
   getState,
   subscribe,
-  selectDigitCount,
+  startGame,
+  goToSelect,
+  playAgain,
+  setGameMode,
+  setDisplayStyle,
+  setDigitCount,
   nextDigit,
+  startRecall,
   setInput,
   submitRecall,
-  playAgain,
-  goToSelect,
+  getTimedDuration,
   type State,
+  type GameMode,
+  type DisplayStyle,
 } from "./store";
 
-const DIGIT_OPTIONS = [10, 15, 20, 25, 30];
+const PRESETS = [4, 6, 8, 10, 15];
 
-function renderSelect(): string {
+function renderSelect(s: State): string {
   return `
     <div class="screen" id="screen-select">
       <p class="label">digits to memorize</p>
+
       <div class="digit-options">
-        ${DIGIT_OPTIONS.map(
+        ${PRESETS.map(
           (n) => `
-          <button class="digit-btn" data-n="${n}">${n}</button>
+          <button class="digit-btn ${s.digitCount === n ? "active" : ""}" data-n="${n}">${n}</button>
         `,
         ).join("")}
+        <input
+          class="digit-custom"
+          id="custom-digit-input"
+          type="number"
+          min="1"
+          max="999"
+          placeholder="custom"
+          value="${PRESETS.includes(s.digitCount) ? "" : s.digitCount}"
+        />
       </div>
+
+      <div class="options-group">
+        <p class="label">display</p>
+        <div class="toggle-row">
+          <button class="toggle-btn ${s.displayStyle === "one-at-a-time" ? "active" : ""}" data-display="one-at-a-time">one at a time</button>
+          <button class="toggle-btn ${s.displayStyle === "all-at-once" ? "active" : ""}" data-display="all-at-once">all at once</button>
+        </div>
+      </div>
+
+      <div class="options-group">
+        <p class="label">mode</p>
+        <div class="toggle-row">
+          <button class="toggle-btn ${s.gameMode === "freetime" ? "active" : ""}" data-mode="freetime">free-time</button>
+          <button class="toggle-btn ${s.gameMode === "timed" ? "active" : ""}" data-mode="timed">timed</button>
+        </div>
+      </div>
+
+      ${
+        s.gameMode === "timed"
+          ? `
+        <p class="timing-hint">
+          ${
+            s.displayStyle === "one-at-a-time"
+              ? `1.5s per digit · ${(1.5 * s.digitCount).toFixed(1)}s total`
+              : `${((3000 + s.digitCount * 500) / 1000).toFixed(1)}s to memorize all ${s.digitCount} digits`
+          }
+        </p>
+      `
+          : ""
+      }
+
+      <button class="start-btn" id="btn-start">start</button>
     </div>
   `;
 }
 
-function renderMemorize(s: State): string {
+function renderMemorizeOne(s: State): string {
   const isLast = s.currentIndex === s.sequence.length - 1;
+  const isTimed = s.gameMode === "timed";
+  const duration = getTimedDuration("one-at-a-time", s.digitCount);
   return `
-    <div class="screen" id="screen-memorize">
+    <div class="screen" id="screen-memorize-one">
       <span class="progress">${s.currentIndex + 1} / ${s.sequence.length}</span>
-      <span class="digit-display">${s.sequence[s.currentIndex]}</span>
-      <button class="next-btn" id="btn-next">
-        ${isLast ? "done" : "next →"}
-      </button>
-      <span class="hint">or press → / space</span>
+      <span class="digit-display ${isTimed ? "timed-flash" : ""}"
+        ${isTimed ? `style="animation-duration:${duration}ms"` : ""}
+      >${s.sequence[s.currentIndex]}</span>
+      ${
+        isTimed
+          ? `<span class="hint">auto-advancing every ${(duration / 1000).toFixed(1)}s</span>`
+          : `<button class="next-btn" id="btn-next">${isLast ? "done" : "next →"}</button>
+           <span class="hint">or press → / space</span>`
+      }
     </div>
   `;
+}
+
+function renderMemorizeAll(s: State): string {
+  const isTimed = s.gameMode === "timed";
+  const duration = getTimedDuration("all-at-once", s.digitCount);
+  const chunks = chunkSequence(s.sequence, 5);
+  return `
+    <div class="screen" id="screen-memorize-all">
+      <p class="label">${isTimed ? `memorize · ${(duration / 1000).toFixed(1)}s` : "memorize"}</p>
+      <div class="sequence-all">
+        ${chunks
+          .map(
+            (chunk) => `
+          <div class="sequence-chunk">${chunk.map((d) => `<span class="seq-digit">${d}</span>`).join("")}</div>
+        `,
+          )
+          .join("")}
+      </div>
+      ${
+        isTimed
+          ? `<div class="timer-bar-wrap"><div class="timer-bar" style="animation-duration:${duration}ms"></div></div>`
+          : `<button class="next-btn" id="btn-recall">i'm ready →</button>`
+      }
+    </div>
+  `;
+}
+
+function chunkSequence(seq: number[], size: number): number[][] {
+  const chunks: number[][] = [];
+  for (let i = 0; i < seq.length; i += size)
+    chunks.push(seq.slice(i, i + size));
+  return chunks;
 }
 
 function renderRecall(s: State): string {
@@ -52,7 +139,7 @@ function renderRecall(s: State): string {
           type="text"
           inputmode="numeric"
           autocomplete="off"
-          placeholder="${"_".repeat(s.sequence.length)}"
+          placeholder="${"_".repeat(Math.min(s.sequence.length, 30))}"
           value="${s.input}"
           maxlength="${s.sequence.length}"
         />
@@ -104,27 +191,13 @@ function buildComparison(sequence: number[], input: string): string {
 }
 
 function renderResult(s: State): string {
-  const showComparison = !s.isCorrect;
   return `
     <div class="screen" id="screen-result">
       <p class="result-verdict ${s.isCorrect ? "correct" : "wrong"}">
         ${s.isCorrect ? "correct" : "wrong"}
       </p>
 
-      ${
-        showComparison
-          ? buildComparison(s.sequence, s.input)
-          : `
-        <div class="comparison">
-          <div class="comparison-col">
-            <p class="label">sequence</p>
-            <div class="sequence-display">
-              ${s.sequence.map((d) => `<span class="char-correct">${d}</span>`).join("")}
-            </div>
-          </div>
-        </div>
-      `
-      }
+      ${buildComparison(s.sequence, s.input)}
 
       <div class="streak-row">
         <div class="streak-stat">
@@ -139,7 +212,7 @@ function renderResult(s: State): string {
 
       <div class="action-row">
         <button class="play-again-btn" id="btn-again">play again</button>
-        <button class="change-digits-btn" id="btn-select">change digits</button>
+        <button class="change-digits-btn" id="btn-select">settings</button>
       </div>
     </div>
   `;
@@ -164,10 +237,13 @@ function render(s: State) {
 
   switch (s.phase) {
     case "select":
-      app.innerHTML = renderSelect();
+      app.innerHTML = renderSelect(s);
       break;
-    case "memorize":
-      app.innerHTML = renderMemorize(s);
+    case "memorize-one":
+      app.innerHTML = renderMemorizeOne(s);
+      break;
+    case "memorize-all":
+      app.innerHTML = renderMemorizeAll(s);
       break;
     case "recall":
       app.innerHTML = renderRecall(s);
@@ -184,14 +260,61 @@ function bindEvents(s: State) {
     document
       .querySelectorAll<HTMLButtonElement>(".digit-btn")
       .forEach((btn) => {
+        btn.addEventListener("click", () => {
+          setDigitCount(Number(btn.dataset.n));
+          const customInput = document.getElementById(
+            "custom-digit-input",
+          ) as HTMLInputElement;
+          if (customInput) customInput.value = "";
+        });
+      });
+
+    const customInput = document.getElementById(
+      "custom-digit-input",
+    ) as HTMLInputElement;
+    customInput?.addEventListener("blur", () => {
+      const val = parseInt(customInput.value);
+      if (val > 0) {
+        setDigitCount(val);
+        document
+          .querySelectorAll(".digit-btn")
+          .forEach((b) => b.classList.remove("active"));
+      }
+    });
+
+    document
+      .querySelectorAll<HTMLButtonElement>("[data-display]")
+      .forEach((btn) => {
         btn.addEventListener("click", () =>
-          selectDigitCount(Number(btn.dataset.n)),
+          setDisplayStyle(btn.dataset.display as DisplayStyle),
         );
       });
+
+    document
+      .querySelectorAll<HTMLButtonElement>("[data-mode]")
+      .forEach((btn) => {
+        btn.addEventListener("click", () =>
+          setGameMode(btn.dataset.mode as GameMode),
+        );
+      });
+
+    document.getElementById("btn-start")?.addEventListener("click", () => {
+      const customInput = document.getElementById(
+        "custom-digit-input",
+      ) as HTMLInputElement;
+      const val = parseInt(customInput.value);
+      startGame(val > 0 ? val : undefined);
+    });
   }
 
-  if (s.phase === "memorize") {
+  if (s.phase === "memorize-one" && s.gameMode === "freetime") {
     document.getElementById("btn-next")?.addEventListener("click", nextDigit);
+  }
+
+  if (s.phase === "memorize-all" && s.gameMode === "freetime") {
+    document
+      .getElementById("btn-recall")
+      ?.addEventListener("click", startRecall);
   }
 
   if (s.phase === "recall") {
@@ -224,7 +347,11 @@ function bindEvents(s: State) {
 
 document.addEventListener("keydown", (e) => {
   const s = getState();
-  if (s.phase === "memorize" && (e.key === "ArrowRight" || e.key === " ")) {
+  if (
+    s.phase === "memorize-one" &&
+    s.gameMode === "freetime" &&
+    (e.key === "ArrowRight" || e.key === " ")
+  ) {
     e.preventDefault();
     nextDigit();
   }
@@ -232,6 +359,5 @@ document.addEventListener("keydown", (e) => {
 
 const app = document.getElementById("app")!;
 app.insertAdjacentHTML("beforebegin", '<span class="wordmark">numgame</span>');
-
 subscribe(render);
 render(getState());
