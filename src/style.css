@@ -475,3 +475,211 @@ body {
   left: 50%;
   transform: translateX(-50%);
 }
+
+/* ── Landing screen ── */
+.wordmark-inline {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.auth-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.auth-btn {
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  padding: 0.85rem 1.5rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
+}
+
+.auth-btn:hover {
+  border-color: var(--fg);
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.auth-btn:hover svg path {
+  fill: var(--bg);
+}
+
+.guest-btn {
+  font-family: var(--font);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  padding: 0.6rem;
+  border: none;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.guest-btn:hover {
+  color: var(--fg);
+}
+
+/* ── User bar ── */
+.user-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.guest-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.username {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.elo-badge {
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+  letter-spacing: 0.08em;
+}
+
+.icon-btn {
+  font-family: var(--font);
+  font-size: 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-muted);
+  padding: 0.25rem;
+  transition: color 0.12s;
+}
+
+.icon-btn:hover {
+  color: var(--fg);
+}
+
+.text-btn {
+  font-family: var(--font);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.text-btn:hover {
+  color: var(--fg);
+}
+
+/* ── Elo change ── */
+.elo-change.positive {
+  color: var(--fg);
+}
+.elo-change.negative {
+  color: var(--fg);
+}
+
+/* ── Leaderboard ── */
+.lb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.lb-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.lb-me {
+  font-weight: 700;
+}
+
+.lb-rank {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  width: 1.5rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.lb-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.lb-avatar-placeholder {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.lb-name {
+  font-size: 0.85rem;
+  flex: 1;
+}
+
+.lb-elo {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}

@@ -1,4 +1,8 @@
+import { getSession, ensureUserProfile } from "./auth";
+import { submitScore } from "./scores";
+
 export type Phase =
+  | "landing"
   | "select"
   | "memorize-one"
   | "memorize-all"
@@ -6,6 +10,13 @@ export type Phase =
   | "result";
 export type GameMode = "timed" | "freetime";
 export type DisplayStyle = "one-at-a-time" | "all-at-once";
+
+export interface User {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  elo: number;
+}
 
 export interface State {
   phase: Phase;
@@ -18,6 +29,9 @@ export interface State {
   isCorrect: boolean;
   streak: number;
   bestStreak: number;
+  eloChange: number | null;
+  user: User | null;
+  authLoading: boolean;
 }
 
 type Listener = (s: State) => void;
@@ -49,7 +63,7 @@ function save(s: State) {
 const saved = load();
 
 let state: State = {
-  phase: "select",
+  phase: "landing",
   gameMode: (saved.gameMode as GameMode) ?? "freetime",
   displayStyle: (saved.displayStyle as DisplayStyle) ?? "one-at-a-time",
   digitCount: (saved.digitCount as number) ?? 6,
@@ -59,6 +73,9 @@ let state: State = {
   isCorrect: false,
   streak: (saved.streak as number) ?? 0,
   bestStreak: (saved.bestStreak as number) ?? 0,
+  eloChange: null,
+  user: null,
+  authLoading: true,
 };
 
 function set(patch: Partial<State>) {
@@ -73,13 +90,35 @@ export const subscribe = (fn: Listener) => {
 };
 export const getState = () => state;
 
-// Science-backed timings
-// One-at-a-time: 1.5s per digit (Baddeley phonological loop)
-// All-at-once: 3s base + 0.5s per digit (chunking theory)
 export function getTimedDuration(style: DisplayStyle, count: number): number {
   if (style === "one-at-a-time") return 1500;
   return 3000 + count * 500;
 }
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+
+export async function initAuth() {
+  const session = await getSession();
+  if (session?.user) {
+    await ensureUserProfile(session.user);
+    const { data } = await import("./supabase").then((m) =>
+      m.supabase
+        .from("users")
+        .select("id, username, avatar_url, elo")
+        .eq("id", session.user.id)
+        .single(),
+    );
+    set({ user: data, authLoading: false, phase: "select" });
+  } else {
+    set({ authLoading: false, phase: "landing" });
+  }
+}
+
+export function setUser(user: User | null) {
+  set({ user, phase: user ? "select" : "landing" });
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
 
 export function setGameMode(mode: GameMode) {
   set({ gameMode: mode });
@@ -101,7 +140,7 @@ export function startGame(overrideCount?: number) {
   if (state.displayStyle === "all-at-once") {
     set({ phase: "memorize-all", sequence: seq, currentIndex: 0, input: "" });
     if (state.gameMode === "timed") {
-      const duration = getTimedDuration("all-at-once", state.digitCount);
+      const duration = getTimedDuration("all-at-once", count);
       setTimeout(() => {
         if (getState().phase === "memorize-all") set({ phase: "recall" });
       }, duration);
@@ -148,12 +187,32 @@ export function setInput(val: string) {
   set({ input: clean });
 }
 
-export function submitRecall() {
-  if (state.phase !== "recall") return;
-  const correct = state.input === state.sequence.join("");
-  const streak = correct ? state.streak + 1 : 0;
-  const bestStreak = Math.max(streak, state.bestStreak);
-  set({ phase: "result", isCorrect: correct, streak, bestStreak });
+export async function submitRecall() {
+  if (state.phase !== 'recall') return
+  const correct = state.input === state.sequence.join('')
+  const streak = correct ? state.streak + 1 : 0
+  const bestStreak = Math.max(streak, state.bestStreak)
+
+  let eloChange: number | null = null
+
+  if (state.user) {
+    eloChange = await submitScore({
+      userId: state.user.id,
+      sequence: state.sequence,
+      answer: state.input,
+      digitCount: state.digitCount,
+      displayStyle: state.displayStyle,
+      gameMode: state.gameMode,
+    })
+
+    // Refresh elo
+    const { data } = await import('./supabase').then(m =>
+      m.supabase.from('users').select('id, username, avatar_url, elo').eq('id', state.user!.id).single()
+    )
+    if (data) set({ user: data })
+  }
+
+  set({ phase: 'result', isCorrect: correct, streak, bestStreak, eloChange })
 }
 
 export function playAgain() {
@@ -161,4 +220,7 @@ export function playAgain() {
 }
 export function goToSelect() {
   set({ phase: "select" });
+}
+export function goToLanding() {
+  set({ phase: "landing" });
 }
