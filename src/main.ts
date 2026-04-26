@@ -2,10 +2,10 @@ import {
   getState, subscribe, startGame, goToSelect, goToLanding, playAgain,
   setGameMode, setDisplayStyle, setDigitCount,
   nextDigit, startRecall, setInput, submitRecall,
-  getTimedDuration, hydrateUser, setUser,
+  getTimedDuration, setUser, handleSignIn,
   type State, type GameMode, type DisplayStyle,
 } from './store'
-import { signInWithGitHub, signInWithGoogle, signOut, ensureUserProfile } from './auth'
+import { signInWithGitHub, signInWithGoogle, signOut } from './auth'
 import { getLeaderboard, getUserRank } from './leaderboard'
 import { supabase } from './supabase'
 
@@ -469,40 +469,16 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// ── Auth listener ─────────────────────────────────────────────────────────────
-
-supabase.auth.onAuthStateChange(async (event, session) => {
-  if (event === "SIGNED_IN" && session?.user) {
-    await ensureUserProfile(session.user);
-    const { data } = await supabase
-      .from("users")
-      .select("id, username, avatar_url, elo")
-      .eq("id", session.user.id)
-      .single();
-    if (data) setUser(data);
-  } else if (event === "SIGNED_OUT") {
-    setUser(null);
-  }
-});
-
-// ── Boot ──────────────────────────────────────────────────────────────────────
+// ── Auth listener + Boot ─────────────────────────────────────────────────────
 
 subscribe(render)
-render(getState()) // show landing immediately
-hydrateUser().then(() => {
-  render(getState())
-  
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-      await ensureUserProfile(session.user)
-      const { data } = await supabase
-        .from('users')
-        .select('id, username, avatar_url, elo')
-        .eq('id', session.user.id)
-        .single()
-      if (data) setUser(data)
-    } else if (event === 'SIGNED_OUT') {
-      setUser(null)
-    }
-  })
+render(getState()) // render immediately from cache
+
+supabase.auth.onAuthStateChange(async (event, session) => {
+  console.log('auth event:', event)
+  if (event === 'SIGNED_IN' && session?.user) {
+    await handleSignIn(session.user)
+  } else if (event === 'SIGNED_OUT') {
+    setUser(null)
+  }
 })
