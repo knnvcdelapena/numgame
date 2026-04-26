@@ -101,13 +101,8 @@ export async function initAuth() {
   const session = await getSession();
   if (session?.user) {
     await ensureUserProfile(session.user);
-    const { data } = await import("./supabase").then((m) =>
-      m.supabase
-        .from("users")
-        .select("id, username, avatar_url, elo")
-        .eq("id", session.user.id)
-        .single(),
-    );
+   const { supabase } = await import('./supabase')
+const { data } = await supabase.from('users').select('id, username, avatar_url, elo').eq('id', session.user.id).single();
     set({ user: data, authLoading: false, phase: "select" });
   } else {
     set({ authLoading: false, phase: "landing" });
@@ -115,7 +110,7 @@ export async function initAuth() {
 }
 
 export function setUser(user: User | null) {
-  set({ user, phase: user ? "select" : "landing" });
+  set({ user, phase: user ? "select" : "landsubmitRecallng" });
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────
@@ -205,9 +200,8 @@ export async function submitRecall() {
 })
 
     // Refresh elo
-    const { data } = await import('./supabase').then(m =>
-      m.supabase.from('users').select('id, username, avatar_url, elo').eq('id', state.user!.id).single()
-    )
+    const { supabase } = await import('./supabase')
+const { data } = await supabase.from('users').select('id, username, avatar_url, elo').eq('id', state.user!.id).single()
     if (data) set({ user: data })
   }
 
