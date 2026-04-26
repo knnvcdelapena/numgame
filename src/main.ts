@@ -488,7 +488,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
 subscribe(render)
-
+render(getState()) // show landing immediately
 hydrateUser().then(() => {
   render(getState())
   
