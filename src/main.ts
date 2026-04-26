@@ -469,7 +469,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// ── Auth listener + Boot ─────────────────────────────────────────────────────
+// ── Auth listener + Boot ──
 
 subscribe(render)
 render(getState()) // render immediately from cache
