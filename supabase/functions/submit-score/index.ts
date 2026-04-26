@@ -34,6 +34,26 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Rate limiting - max 1 submission per 5 seconds per user
+const { data: recentGames } = await supabase
+  .from('games')
+  .select('played_at')
+  .eq('user_id', user.id)
+  .order('played_at', { ascending: false })
+  .limit(1)
+
+if (recentGames && recentGames.length > 0) {
+  const lastGame = new Date(recentGames[0].played_at).getTime()
+  const now = Date.now()
+  const diff = now - lastGame
+
+  if (diff < 5000) {
+    return new Response(JSON.stringify({ error: 'Too many requests' }), {
+      status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+}
+
     // Parse body
     const { sequence, answer, digitCount, displayStyle, gameMode } = await req.json()
 
