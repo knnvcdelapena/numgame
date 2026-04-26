@@ -477,7 +477,11 @@ render(getState()) // render immediately from cache
 supabase.auth.onAuthStateChange(async (event, session) => {
   console.log('auth event:', event)
   if (event === 'SIGNED_IN' && session?.user) {
-    await handleSignIn(session.user)
+    const currentUser = getState().user
+    // Only handle sign in if we don't already have this user
+    if (!currentUser || currentUser.id !== session.user.id) {
+      await handleSignIn(session.user)
+    }
   } else if (event === 'SIGNED_OUT') {
     setUser(null)
   }
