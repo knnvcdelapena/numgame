@@ -110,9 +110,8 @@ const { data } = await supabase.from('users').select('id, username, avatar_url, 
 }
 
 export function setUser(user: User | null) {
-  set({ user, phase: user ? "select" : "landsubmitRecallng" });
+  set({ user, phase: user ? "select" : "landing" });
 }
-
 // ── Actions ───────────────────────────────────────────────────────────────────
 
 export function setGameMode(mode: GameMode) {
