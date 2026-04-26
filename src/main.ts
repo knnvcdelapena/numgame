@@ -507,13 +507,14 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
+let authReady = false
+
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (!authReady) {
+    authReady = true
+    await initAuth()
+  }
+})
 
 subscribe(render)
 render(getState())
-
-// Only init auth once on load
-supabase.auth.onAuthStateChange(async (event) => {
-  if (event === 'INITIAL_SESSION') {
-    initAuth()
-  }
-})
