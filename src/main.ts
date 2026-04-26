@@ -1,5 +1,3 @@
-console.log("main.ts loaded");
-
 import {
   getState, subscribe, startGame, goToSelect, goToLanding, playAgain,
   setGameMode, setDisplayStyle, setDigitCount,
@@ -7,14 +5,9 @@ import {
   getTimedDuration, hydrateUser, setUser,
   type State, type GameMode, type DisplayStyle,
 } from './store'
-import {
-  signInWithGitHub,
-  signInWithGoogle,
-  signOut,
-  ensureUserProfile,
-} from "./auth";
-import { getLeaderboard, getUserRank } from "./leaderboard";
-import { supabase } from "./supabase";
+import { signInWithGitHub, signInWithGoogle, signOut, ensureUserProfile } from './auth'
+import { getLeaderboard, getUserRank } from './leaderboard'
+import { supabase } from './supabase'
 
 const PRESETS = [4, 6, 8, 10, 15];
 
@@ -493,8 +486,8 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
+
 subscribe(render)
-render(getState())
 
 hydrateUser().then(() => {
   render(getState())
@@ -502,8 +495,11 @@ hydrateUser().then(() => {
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
       await ensureUserProfile(session.user)
-      const { supabase: sb } = await import('./supabase')
-      const { data } = await sb.from('users').select('id, username, avatar_url, elo').eq('id', session.user.id).single()
+      const { data } = await supabase
+        .from('users')
+        .select('id, username, avatar_url, elo')
+        .eq('id', session.user.id)
+        .single()
       if (data) setUser(data)
     } else if (event === 'SIGNED_OUT') {
       setUser(null)

@@ -99,19 +99,25 @@ export function getTimedDuration(style: DisplayStyle, count: number): number {
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
 export async function hydrateUser() {
-  const { data: { session } } = await supabase.auth.getSession()
-
-  if (session?.user) {
-    await ensureUserProfile(session.user)
-    const { supabase: sb } = await import('./supabase')
-    const { data } = await sb
-      .from('users')
-      .select('id, username, avatar_url, elo')
-      .eq('id', session.user.id)
-      .single()
-
-    if (data) set({ user: data, authLoading: false, phase: 'select' })
-  } else {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (session?.user) {
+      await ensureUserProfile(session.user)
+      const { data } = await supabase
+        .from('users')
+        .select('id, username, avatar_url, elo')
+        .eq('id', session.user.id)
+        .single()
+      
+      if (data) {
+        set({ user: data, authLoading: false, phase: 'select' })
+      }
+    } else {
+      set({ authLoading: false, phase: 'landing' })
+    }
+  } catch (error) {
+    console.error('Hydration failed:', error)
     set({ authLoading: false, phase: 'landing' })
   }
 }
