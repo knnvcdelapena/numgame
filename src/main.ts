@@ -494,11 +494,11 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 subscribe(render)
+render(getState())
 
 hydrateUser().then(() => {
   render(getState())
   
-  // Listen for auth changes after hydration
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
       await ensureUserProfile(session.user)
