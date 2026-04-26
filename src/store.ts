@@ -99,8 +99,10 @@ export function getTimedDuration(style: DisplayStyle, count: number): number {
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
 export async function hydrateUser() {
+  console.log('hydrating...')
   try {
     const { data: { session } } = await supabase.auth.getSession()
+    console.log('session:', session)
     
     if (session?.user) {
       await ensureUserProfile(session.user)
