@@ -509,7 +509,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 let authReady = false
 
-supabase.auth.onAuthStateChange(async (event, session) => {
+supabase.auth.onAuthStateChange(async () => {
   if (!authReady) {
     authReady = true
     await initAuth()
