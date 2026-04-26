@@ -1,26 +1,12 @@
 console.log("main.ts loaded");
 
 import {
-  getState,
-  subscribe,
-  startGame,
-  goToSelect,
-  goToLanding,
-  playAgain,
-  setGameMode,
-  setDisplayStyle,
-  setDigitCount,
-  nextDigit,
-  startRecall,
-  setInput,
-  submitRecall,
-  getTimedDuration,
-  initAuth,
-  setUser,
-  type State,
-  type GameMode,
-  type DisplayStyle,
-} from "./store";
+  getState, subscribe, startGame, goToSelect, goToLanding, playAgain,
+  setGameMode, setDisplayStyle, setDigitCount,
+  nextDigit, startRecall, setInput, submitRecall,
+  getTimedDuration, hydrateUser, setUser,
+  type State, type GameMode, type DisplayStyle,
+} from './store'
 import {
   signInWithGitHub,
   signInWithGoogle,
@@ -507,14 +493,20 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-let authReady = false
-
-supabase.auth.onAuthStateChange(async () => {
-  if (!authReady) {
-    authReady = true
-    await initAuth()
-  }
-})
-
 subscribe(render)
-render(getState())
+
+hydrateUser().then(() => {
+  render(getState())
+  
+  // Listen for auth changes after hydration
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      await ensureUserProfile(session.user)
+      const { supabase: sb } = await import('./supabase')
+      const { data } = await sb.from('users').select('id, username, avatar_url, elo').eq('id', session.user.id).single()
+      if (data) setUser(data)
+    } else if (event === 'SIGNED_OUT') {
+      setUser(null)
+    }
+  })
+})
