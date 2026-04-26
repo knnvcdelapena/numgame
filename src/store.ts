@@ -101,24 +101,21 @@ export function getTimedDuration(style: DisplayStyle, count: number): number {
 export async function hydrateUser() {
   console.log('hydrating...')
   try {
-    const sessionPromise = supabase.auth.getSession()
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('timeout')), 3000)
-    )
+    const { data: { user } } = await supabase.auth.getUser()
+    console.log('user:', user)
     
-    const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any
-    console.log('session:', session)
-    
-    if (session?.user) {
-      await ensureUserProfile(session.user)
+    if (user) {
+      await ensureUserProfile(user)
       const { data } = await supabase
         .from('users')
         .select('id, username, avatar_url, elo')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single()
       
       if (data) {
         set({ user: data, authLoading: false, phase: 'select' })
+      } else {
+        set({ authLoading: false, phase: 'landing' })
       }
     } else {
       set({ authLoading: false, phase: 'landing' })
