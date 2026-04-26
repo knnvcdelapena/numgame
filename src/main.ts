@@ -508,6 +508,12 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
-subscribe(render);
-render(getState()); // render immediately with current state
-initAuth();
+subscribe(render)
+render(getState())
+
+// Only init auth once on load
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'INITIAL_SESSION') {
+    initAuth()
+  }
+})
